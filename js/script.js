@@ -12,6 +12,9 @@ var punsColors = [],
     designDropdown = document.getElementById('design'),
     colorDropdown = document.getElementById('color'),
     paymentDropdown = document.getElementById('payment'),
+    creditCardField = document.querySelector('input#cc-num'),
+    zipCodeField = document.querySelector('input#zip'),
+    cvvField = document.querySelector('input#cvv'),
     activitiesList = document.querySelector('fieldset.activities'),
     totalCostTextSpan = document.createElement('span'),
     punsRegExp = /puns/i,
@@ -137,6 +140,10 @@ function eventHandlers() {
     paymentDropdown.addEventListener('change', changePaymentHandler);
 
     activitiesList.addEventListener('change', registerActivitiesHandler);
+
+    creditCardField.addEventListener('keyup', checkForNumericInput(16));
+    zipCodeField.addEventListener('keyup', checkForNumericInput(5));
+    cvvField.addEventListener('keyup', checkForNumericInput(3));
 }
 
 function changeSelectedDesignHandler(event) {
@@ -159,6 +166,15 @@ function setSelectedColor(optionsList) {
 function changePaymentHandler(event){
     setPaymentMethodVisibility(event.target);
     addCheckmarkToSelectedOption(event.target, 1);
+}
+
+function checkForNumericInput(maxCharsAllowed) {
+    return event => {
+        event.target.value = event.target.value.replace(/[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;<>?,.@#\s]/, '');
+        if (event.target.value.length > maxCharsAllowed) {
+            event.target.value = event.target.value.substr(0, maxCharsAllowed);
+        }
+    };
 }
 
 function setPaymentMethodVisibility(item) {
@@ -191,16 +207,20 @@ function addCheckmarkToSelectedOption(item, position) {
 function registerActivitiesHandler(event) {
     let totalCost = 0;
     let item = event.target;
+    let timeSlotObj = {};
     if (item.tagName === 'INPUT') {
         let dataCost = item.getAttribute('data-cost');
         let dateAndTime = item.getAttribute('data-day-and-time');
         let selectedName = item.getAttribute('name');
-
-        let timeSlotObj = getTimeSlot(dateAndTime, selectedName, dataCost, item.checked);
-        checkForOverlappingActivities(timeSlotObj);
-        totalCost = parseInt(timeSlotObj.cost);
+        timeSlotObj = getTimeSlot(dateAndTime, selectedName, dataCost, item.checked);
     }
+    checkForOverlappingActivities(timeSlotObj);
+    totalCost = parseInt(timeSlotObj.cost);
+    updateTotalCost(totalCost, item);
 
+}
+
+function updateTotalCost(totalCost, item) {
     let cost = parseInt(totalCostTextSpan.getElementsByTagName('span')[0].innerHTML);
 
     if (item.checked) {
@@ -210,7 +230,6 @@ function registerActivitiesHandler(event) {
     }
     totalCostTextSpan.getElementsByTagName('span')[0].innerHTML = `${cost}`;
     totalCostTextSpan.style.display = 'inline';
-
 }
 
 function getTimeSlot(dateAndTime, name, dataCost, itemChecked) {

@@ -70,8 +70,13 @@ legend {
 
 input[type="text"],
 input[type="email"],
+input#other-title,
 legend {
 	width: 100%;
+}
+
+input#other-title{
+	display: block;
 }
 
 label {
