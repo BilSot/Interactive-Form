@@ -21,9 +21,11 @@
         
         <label for="name">Name:</label>
         <input type="text" id="name" name="user-name">
-        
+        <span id="js-name-error-box"></span>
+
         <label for="mail">Email:</label>
         <input type="email" id="mail" name="user-email">
+        <span id="js-email-error-box"></span>
         
         <label for="title">Job Role</label>
         <select id="title" name="user-title">
@@ -104,7 +106,7 @@
             <input type="checkbox" name="npm" data-day-and-time="Wednesday 1pm-4pm" data-cost="100"> 
             npm Workshop — Wednesday 1pm-4pm, $100
           </label>
-                  	
+        <span id="js-activities-error-box"></span>
       </fieldset>
       <fieldset>
         <legend>Payment Info</legend>
@@ -131,7 +133,7 @@
 
           <div class="col-3 col">
             <label for="cvv">CVV:</label>
-            <input id="cvv" name="user-cvv" type="text"> 
+            <input id="cvv" name="user-cvv" type="text">
           </div>
 
           <label for="exp-month">Expiration Date:</label>
@@ -156,7 +158,8 @@
             <option value="2018">2018</option>
             <option value="2019">2019</option>
             <option value="2020">2020</option>        		          
-          </select> 	                  	         
+          </select>
+          <span id="js-cc-error-box"></span>
         </div>
 
         <div id="paypal" class="paypal">

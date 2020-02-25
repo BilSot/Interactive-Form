@@ -158,6 +158,7 @@ option {
 }
 
 .credit-card {
+	position: relative;
 	margin-top: 1.25em;
 }
 
@@ -184,6 +185,58 @@ option {
   display: table;
   clear: both;
 }
+
+#js-cc-error-box,
+#js-name-error-box,
+#js-email-error-box,
+#js-activities-error-box{
+	border-radius: 5px;
+	display: none;
+	font-size: 1.3em;
+	text-align: center;
+	position: absolute;
+	background: rgb(226, 49, 9);
+
+	width: 250px;
+	padding: 7px 10px;
+	color: #fff;
+}
+#js-cc-error-box{
+	right: -48%;
+	top: 25px;
+}
+
+#js-name-error-box{
+	left: 69%;
+	top: 35%;
+}
+#js-email-error-box{
+	left: 69%;
+	top: 45%;
+}
+
+#js-activities-error-box{
+	left: 69%;
+	top: 85%;
+}
+
+#js-cc-error-box:after,
+#js-name-error-box:after,
+#js-email-error-box:after,
+#js-activities-error-box:after {
+	right: 100%;
+	top: 50%;
+	border: solid transparent 6px;
+	content: " ";
+	height: 0;
+	width: 0;
+	position: absolute;
+	pointer-events: none;
+	border-color: rgba(226, 49, 9, 0);
+	border-right-color: rgb(226, 49, 9);
+
+}
+
 
 /* ================================= 
   Media Queries
