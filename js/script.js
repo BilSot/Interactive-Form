@@ -6,7 +6,7 @@ const punsRegExp = /puns/i,
     heartSymbol = '\u2665',
     checkMark = '\u2713',
     heartRegExp = new RegExp(heartSymbol, ''),
-    onlyDigitsRegExp = /[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;'<>?,.@#\s]*/,
+    onlyDigitsRegExp = /[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;'<>?,.@#\s]+/,
     mailAddressRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 var punsColors = [],
