@@ -6,7 +6,7 @@ const punsRegExp = /puns/i,
     heartSymbol = '\u2665',
     checkMark = '\u2713',
     heartRegExp = new RegExp(heartSymbol, ''),
-    onlyDigitsRegExp = /[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;'<>?,.@#\s]/,
+    onlyDigitsRegExp = /[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;'<>?,.@#\s]*/,
     mailAddressRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 var punsColors = [],
@@ -210,14 +210,17 @@ function eventHandlers() {
     creditCardField.addEventListener('input', checkForNumericInput(16));
     creditCardField.addEventListener('focus', checkForInputLength('block', 'Credit card number must be between 13 and 16 digits', 13));
     creditCardField.addEventListener('blur', checkForInputLength('none', '', 13));
+    creditCardField.addEventListener('paste', checkForNumericInput(16));
 
     zipCodeField.addEventListener('input', checkForNumericInput(5));
     zipCodeField.addEventListener('focus', checkForInputLength('block', 'Zip code must be 5 digits', 5));
     zipCodeField.addEventListener('blur', checkForInputLength('none', '', 5));
+    zipCodeField.addEventListener('paste', checkForNumericInput( 5));
 
     cvvField.addEventListener('input', checkForNumericInput(3));
     cvvField.addEventListener('focus', checkForInputLength('block', 'CVV must be 3 digits', 3));
     cvvField.addEventListener('blur', checkForInputLength('none', '', 3));
+    cvvField.addEventListener('paste', checkForNumericInput( 3));
 
     formElem.addEventListener('submit', function (event) {
         clearErrorMessages();
