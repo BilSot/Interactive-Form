@@ -171,7 +171,7 @@ function hideColorOptionsList() {
 }
 
 /***
- * Lists the events that can occur on the HTML elements
+ * Attaches the events that occur on the HTML elements
  */
 function attachEventListeners() {
     nameInput.addEventListener('blur', function(event){
@@ -227,9 +227,9 @@ function attachEventListeners() {
 }
 
 /***
- * The Color dropdown is displayed.
- * It checks the selected option's value if it contains either the word `puns` or `heart`.
- * The 1st color option displayed is set as `selected`
+ * It displays the Color dropdown list.
+ * It checks if the selected option's value contains either the word `puns` or `heart`.
+ * The 1st color option displayed, from each category (puns or hearts) is set as `selected`
  */
 function changeSelectedDesignHandler() {
     colorDivSection.style.display = 'block';
@@ -299,7 +299,8 @@ function changePaymentHandler(event) {
 }
 
 /***
- * Retrieves the selected activity's info (cost, day, time) and passes it to the `getActivityDataObj` function
+ * Retrieves the selected activity's info (cost, day, time), checks for other activities happening at the same day and time
+ * and updates the total cost
  * @param{Event} event
  */
 function activitiesChangeHandler(event) {
