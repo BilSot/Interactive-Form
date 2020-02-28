@@ -4,9 +4,8 @@
  ******************************************/
 const punsRegExp = /puns/i,
     heartSymbol = '\u2665',
-    checkMark = '\u2713',
     heartRegExp = new RegExp(heartSymbol, ''),
-    onlyDigitsRegExp = /[a-zA-Z-!$%^&*()_+|~=`{}\[\]:\/;'<>?,.@#\s]+/,
+    nonDigitsRegExp = /\D+/,
     mailAddressRegExp = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 var punsColors = [],
@@ -53,20 +52,21 @@ var punsColors = [],
     };
 
 /***
- * Once the whole form is displayed, the essential functionalities are `fired`
+ * Once the whole form is displayed, the default state of the form is set (hiding and displaying elements),
+ * the colors of the two designs and the payment methods are stored in arrays; the colors are hidden until a design is chosen
+ * and the event listeners are attached to the elements
  */
 window.onload = function () {
     setInitialFormState();
     punsColors = jsPunsColorsList(colorDropdown.options);
     heartColors = jsHeartColorsList(colorDropdown.options);
     paymentMethods = getPaymentMethods(paymentDropdown.options);
-    hideColorOptionsList();
-    //setDefaultSelectedOption();
-    eventHandlers();
+    //hideColorOptionsList();
+    attachEventListeners();
 };
 
 /***
- * Sets the default state of the form (hiding and displaying elements)
+ * Sets the default state of the form (hiding and displaying elements and setting placeholders for the Color and Payment dropdown lists)
  */
 function setInitialFormState() {
     nameInput = document.getElementById('name');
@@ -77,12 +77,21 @@ function setInitialFormState() {
     colorDivSection.style.display = 'none';
     paypalSection.style.display = 'none';
     bitcoinSection.style.display = 'none';
-    paymentDropdown.options[1].innerHTML = checkMark + paymentDropdown.options[1].innerHTML;
+
+    designDropdown.options[0].disabled = true;
+    designDropdown.options[0].selected = true;
+    designDropdown.options[0].hidden = true;
+
+    paymentDropdown.options[0].disabled = true;
+    paymentDropdown.options[0].selected = true;
+    paymentDropdown.options[0].hidden = true;
 
     let colorSelectElem = document.getElementById('color');
     let defaultColorOption = document.createElement('option');
     defaultColorOption.innerHTML = "Please select a T-shirt theme";
     defaultColorOption.selected = true;
+    defaultColorOption.disabled = true;
+    defaultColorOption.hidden = true;
     colorSelectElem.insertBefore(defaultColorOption, colorSelectElem.firstChild);
 
     addSpanCostHolder();
@@ -149,11 +158,11 @@ function getPaymentMethods(paymentMethodOptions) {
 }
 
 /***
- * On load, the Design is set to default (`Select Theme`) and the colors are not accessible until another selection is being made
+ * If the Design's selected option is the default (`Select Theme`), the colors are not accessible until another selection is being made
  */
 function hideColorOptionsList() {
-    let defaultOption = 'select theme';
-    if (designDropdown.options[0].value.toLowerCase() === defaultOption) {
+    let defaultOption = designDropdown.options[designDropdown.selectedIndex].value;
+    if (defaultOption.toLowerCase() === 'select theme') {
         let colorsList = colorDropdown.options;
         for (let i = 1; i < colorsList.length; i++) {
             colorsList[i].style.display = 'none';
@@ -162,19 +171,9 @@ function hideColorOptionsList() {
 }
 
 /***
- * On form load, the checkmark sign is added in front of the selected option in the dropdown lists of the form
- */
-function setDefaultSelectedOption() {
-    addCheckmarkToSelectedOption(jobPositionDropdown, 0);
-    addCheckmarkToSelectedOption(sizeDropdown, 0);
-    addCheckmarkToSelectedOption(monthDropdown, 0);
-    addCheckmarkToSelectedOption(yearDropdown, 0);
-}
-
-/***
  * Lists the events that can occur on the HTML elements
  */
-function eventHandlers() {
+function attachEventListeners() {
     nameInput.addEventListener('blur', function(event){
         validateNameField(event.target);
     });
@@ -184,12 +183,6 @@ function eventHandlers() {
     });
 
     designDropdown.addEventListener('change', changeSelectedDesignHandler);
-    //on the 1st change of the design, the default option is hidden. The color's default option is hidden too.
-    // This needs to be run only once
-    designDropdown.addEventListener('change', function () {
-        this.options[0].style.display = 'none';
-        colorDropdown.options[0].style.display = 'none';
-    }, {once: true});
 
     jobPositionDropdown.addEventListener('change', function (event) {
         if (event.target.options[event.target.selectedIndex].value === 'other') {
@@ -199,28 +192,24 @@ function eventHandlers() {
         }
     });
 
-    //on the 1st change of the payment method, the default option is hidden. This needs to be run only once
-    paymentDropdown.addEventListener('change', function () {
-        this.options[0].style.display = 'none';
-    }, {once: true});
     paymentDropdown.addEventListener('change', changePaymentHandler);
 
     activitiesList.addEventListener('change', activitiesChangeHandler);
 
     creditCardField.addEventListener('input', checkForNumericInput(16));
-    creditCardField.addEventListener('focus', checkForInputLength('block', 'Credit card number must be between 13 and 16 digits', 13));
-    creditCardField.addEventListener('blur', checkForInputLength('none', '', 13));
     creditCardField.addEventListener('paste', checkForNumericInput(16));
+    creditCardField.addEventListener('focus', checkForValidInputOnFocus('block', 'Credit card number must be between 13 and 16 digits', 13));
+    creditCardField.addEventListener('blur', checkForValidInputOnBlur( 13));
 
     zipCodeField.addEventListener('input', checkForNumericInput(5));
-    zipCodeField.addEventListener('focus', checkForInputLength('block', 'Zip code must be 5 digits', 5));
-    zipCodeField.addEventListener('blur', checkForInputLength('none', '', 5));
-    zipCodeField.addEventListener('paste', checkForNumericInput( 5));
+    zipCodeField.addEventListener('paste', checkForNumericInput(5));
+    zipCodeField.addEventListener('focus', checkForValidInputOnFocus('block', 'Zip code must be 5 digits', 5));
+    zipCodeField.addEventListener('blur', checkForValidInputOnBlur( 5));
 
     cvvField.addEventListener('input', checkForNumericInput(3));
-    cvvField.addEventListener('focus', checkForInputLength('block', 'CVV must be 3 digits', 3));
-    cvvField.addEventListener('blur', checkForInputLength('none', '', 3));
-    cvvField.addEventListener('paste', checkForNumericInput( 3));
+    cvvField.addEventListener('paste', checkForNumericInput(3));
+    cvvField.addEventListener('focus', checkForValidInputOnFocus('block', 'CVV must be 3 digits', 3));
+    cvvField.addEventListener('blur', checkForValidInputOnBlur( 3));
 
     formElem.addEventListener('submit', function (event) {
         clearErrorMessages();
@@ -238,23 +227,23 @@ function eventHandlers() {
 }
 
 /***
- * Takes the selected option's label and passes it to the `validateSelectedOption` function.
- * Calls the `setSelectedColor` function for marking the 1st color option as `selected`
+ * The Color dropdown is displayed.
+ * It checks the selected option's value if it contains either the word `puns` or `heart`.
+ * The 1st color option displayed is set as `selected`
  */
 function changeSelectedDesignHandler() {
     colorDivSection.style.display = 'block';
     let optionItem = this.options[this.selectedIndex].label;
-    validateSelectedOption(optionItem.toLowerCase());
+    matchSelectedOption(optionItem.toLowerCase());
     defineSelectedColor(colorDropdown.options);
-    //addCheckmarkToSelectedOption(event.target, 1);
 }
 
 /***
- * Validates the optionItemLabel with the punsRegExp and heartRegExp. according to which test passes, the according
- * color options are displayed and hidden
+ * Checks whether the `optionItemLabel` contains either the word `puns` or `heart`. In case of `puns` matched, the `puns` colors
+ * are shown and the `heart` colors are hidden and vice-versa.
  * @param{String} optionItemLabel
  */
-function validateSelectedOption(optionItemLabel) {
+function matchSelectedOption(optionItemLabel) {
     if (punsRegExp.test(optionItemLabel)) {
         setColorOptionsVisibility(punsColors, 'block');
         setColorOptionsVisibility(heartColors, 'none');
@@ -265,7 +254,7 @@ function validateSelectedOption(optionItemLabel) {
 }
 
 /***
- * Sets the style, defined in the `style` parameter, to all the array's elements
+ * Sets the visibility of the color options, stored in the `array`, based on the `style`
  * @param{Array} array
  * @param{String} style
  */
@@ -291,25 +280,15 @@ function defineSelectedColor(optionsList) {
             break;
         }
     }
-    //addCheckmarkToSelectedOption(colorDropdown, 1);
 }
 
 /***
- * Displays the respective section on the form, according to the selected option and adds the checkmark in front of it
+ * Displays the selected payment section on the form and hides the rest of the payment methods
+ * Sets the global `selectedPaymentMethod` to the selected option's value
  * @param {Event} event
  */
 function changePaymentHandler(event) {
-    setPaymentMethodVisibility(event.target);
-    addCheckmarkToSelectedOption(event.target, 1);
-}
-
-/***
- * Displays the item's form section and hides the rest of the payment methods elements.
- * Sets the global `selectedPaymentMethod` to the selected option's value
- * @param{HTMLElement} item
- */
-function setPaymentMethodVisibility(item) {
-    let selectedPayment = item.options[item.selectedIndex].value;
+    let selectedPayment = event.target.options[event.target.selectedIndex].value;
     document.getElementById(selectedPayment).style.display = 'block';
     for (let i = 0; i < paymentMethods.length; i++) {
         if (paymentMethods[i] !== selectedPayment) {
@@ -320,30 +299,7 @@ function setPaymentMethodVisibility(item) {
 }
 
 /***
- * Adds the checkmark symbol in front of the selected item's value
- * The position defines the start index of the options' array
- * @param{HTMLElement} item
- * @param{Number} position
- */
-function addCheckmarkToSelectedOption(item, position) {
-    let innerHtml = item.options[item.selectedIndex].innerHTML;
-
-    for (let i = position; i < item.options.length; i++) {
-        let temp = '';
-        if (!item.options[i].selected) {
-            temp = item.options[i].innerHTML.replace(checkMark, '');
-            item.options[i].innerHTML = temp;
-        } else {
-            if (innerHtml.indexOf(checkMark) === -1) {
-                temp = checkMark + innerHtml;
-                item.options[item.selectedIndex].innerHTML = temp;
-            }
-        }
-    }
-}
-
-/***
- * Retrieves the selected activity's info and passes it to the `getActivityDataObj` function
+ * Retrieves the selected activity's info (cost, day, time) and passes it to the `getActivityDataObj` function
  * @param{Event} event
  */
 function activitiesChangeHandler(event) {
@@ -433,50 +389,45 @@ function updateTotalCost(selectedActivity) {
 }
 
 /***
- * Checks for each key pressed if it's a digit or not. If not, it doesn't allow it to be inserted in the input field and
- * displays an error message. It also checks for the maximum allowed length of the input. It displays an error message
- * if exceeded and no input is further allowed
+ * Checks for the content of the input element if it contains only digits. If not, it displays an error message.
+ * It also checks for the maximum allowed length of the input. It displays an error message if exceeded
+ * In case the input is correct, it clears out the error messages and styling
  * @param{Number} maxCharsAllowed
  * @return {function}
  */
 function checkForNumericInput(maxCharsAllowed) {
     return event => {
-        let keyInserted = event.target.value;
+        let isNonNumericInput = false;
+        let exceedsMaxLength = false;
+        let contentInserted = event.target.value;
+
         if (event.target.value.length === 0) {
             resetErrorBox(event);
             return;
         }
-        if (event.shiftKey) {
-            event.preventDefault();
-        }
-        let error1 = false;
-        let error2 = false;
-        if (onlyDigitsRegExp.test(keyInserted)) {
-            error1 = true;
-            event.target.value = event.target.value.replace(onlyDigitsRegExp, '');
-        }
-        if (event.target.value.length > maxCharsAllowed) {
-            error2 = true;
+
+        if (nonDigitsRegExp.test(contentInserted)) {
+            ccErrorMessageBox.style.display = 'block';
+            event.target.style.border = '2px solid rgb(226, 49, 9)';
+            ccErrorMessageBox.innerHTML = numericInputMsg.message;
+            numericInputMsg.displayed = true;
+            isNonNumericInput = true;
+
         }
 
-        if (error1 && !error2) {
-            if (!numericInputMsg.displayed) {
-                ccErrorMessageBox.style.display = 'block';
-                ccErrorMessageBox.innerHTML = numericInputMsg.message;
-                numericInputMsg.displayed = true;
-                event.target.style.border = '2px solid rgb(226, 49, 9)';
-            }
-        }
-        if (!error1 && error2) {
-            event.target.value = event.target.value.substr(0, maxCharsAllowed);
-            if (!maxCharsMsg.displayed) {
-                ccErrorMessageBox.style.display = 'block';
+        if (event.target.value.length > maxCharsAllowed) {
+            ccErrorMessageBox.style.display = 'block';
+            event.target.style.border = '2px solid rgb(226, 49, 9)';
+            if(numericInputMsg.displayed) {
+                ccErrorMessageBox.innerHTML += '; ' + maxCharsMsg.message + maxCharsAllowed;
+            }else{
                 ccErrorMessageBox.innerHTML = maxCharsMsg.message + maxCharsAllowed;
-                maxCharsMsg.displayed = true;
-                event.target.style.border = '2px solid rgb(226, 49, 9)';
             }
+            maxCharsMsg.displayed = true;
+            exceedsMaxLength = true;
         }
-        if (!error1 && !error2) {
+
+        if (!isNonNumericInput && !exceedsMaxLength) {
             resetErrorBox(event);
         }
     };
@@ -494,20 +445,43 @@ function resetErrorBox(event) {
 }
 
 /***
- * Checks whether the input length is in the range [0-minCharsAllowed]. If not, it displays the error `message` in the
- * `ccErrorMessageBox` element. If yes, it removes the error styling and message
+ * Checks the validity of the input content whenever the user selects the field.
+ * When the content has less than the minimum required characters AND if there are any NON digit characters inserted, an error message and styling are shown.
+ * If the content is in the correct format, it clears out the error messages and styling
  * @param{String} display - type of css display property
  * @param{String} message
  * @param{Number} minCharsAllowed
  * @return {function}
  */
-function checkForInputLength(display, message, minCharsAllowed) {
+function checkForValidInputOnFocus(display, message, minCharsAllowed) {
     return event => {
-        if (event.target.value.length === 0 || event.target.value.length < minCharsAllowed) {
+        if (nonDigitsRegExp.test(event.target.value) || event.target.value.length === 0 || event.target.value.length < minCharsAllowed) {
             ccErrorMessageBox.style.display = display;
             ccErrorMessageBox.innerHTML = message;
             event.target.style.border = '2px solid rgb(226, 49, 9)';
         } else {
+            resetErrorBox(event);
+        }
+    };
+}
+
+/***
+ * Checks the validity of the input content whenever the user leaves the field.
+ * When the content has less than the required characters OR there are any NON digit characters inserted, an error styling is applied.
+ * If the content has more than the required characters, the content is truncated to the length of `charsRequired`
+ * If the content is in the correct format, it clears out the error messages and styling
+ * @param charsRequired
+ * @return {function}
+ */
+function checkForValidInputOnBlur(charsRequired){
+    return event => {
+        if (event.target.value.length < charsRequired || nonDigitsRegExp.test(event.target.value)) {
+            event.target.style.border = '2px solid rgb(226, 49, 9)';
+        }
+        if(event.target.value.length > charsRequired){
+            event.target.value = event.target.value.substr(0, charsRequired);
+        }
+        if(event.target.value.length === charsRequired && !nonDigitsRegExp.test(event.target.value)){
             resetErrorBox(event);
         }
     };
@@ -524,7 +498,9 @@ function clearErrorMessages(){
 }
 
 /***
- *
+ * Checks if there is any content inserted into the field.
+ * In case of none, an error message is displayed and error border styling is applied to the field
+ * Otherwise, the default styling is applied and the error message is cleared out
  * @param{HTMLInputElement} nameInput
  * @return {Boolean}
  */
@@ -542,7 +518,9 @@ function validateNameField(nameInput) {
 }
 
 /***
- * Validated the value length of the name input
+ * Checks whether the inserted email address is in the correct format.
+ * In case of incorrect input, an error message is displayed and error border styling is applied to the field
+ * Otherwise, the default styling is applied and the error message is cleared out
  * @param{HTMLInputElement} emailInput
  * @return {boolean}
  */
@@ -562,7 +540,9 @@ function validateMailField(emailInput) {
 }
 
 /***
- * Validates the email address inserted into the input
+ * Checks whether there is at least one activity selected.
+ * In case of none, error styling is applied to the title of the Activities section and an error message is displayed
+ * Otherwise, the default styling is applied and the error message is cleared out
  * @param{HTMLOptionsCollection} activitiesSelected
  * @return {boolean}
  */
@@ -589,21 +569,22 @@ function validateActivities(activitiesSelected) {
 }
 
 /***
- * Validates the 3 fields mandatory for the credit card info: credit card number, zip code and cvv
- * In case of faulty input, it displays a summarized error message for all 3 fields
+ * Validates the 3 mandatory fields for the credit card info: credit card number, zip code and cvv
+ * In case of faulty input, it displays an error message for the incorrect fields and applies error border styling
+ * If all the fields are correct, the default border styling is applied and the error messages are cleared out
  * @return {Boolean}
  */
 function validateCreditCardInfo() {
     let validCC = true, validZP = true, validCVV = true;
-    if (creditCardField.value.length === 0 || creditCardField.value.length < 13) {
+    if (creditCardField.value.length === 0 || creditCardField.value.length < 13 || nonDigitsRegExp.test(creditCardField.value)) {
         validCC = displayErrMsgOnSubmit('Credit card number must be between 13 and 16 digits;');
         creditCardField.style.border = '2px solid rgb(226, 49, 9)';
     }
-    if (zipCodeField.value.length === 0 || zipCodeField.value.length < 5) {
+    if (zipCodeField.value.length === 0 || zipCodeField.value.length < 5 || nonDigitsRegExp.test(zipCodeField.value)) {
         validZP = displayErrMsgOnSubmit('\n\nZip code must be 5 digits;');
         zipCodeField.style.border = '2px solid rgb(226, 49, 9)';
     }
-    if (cvvField.value.length === 0 || zipCodeField.value.length < 3) {
+    if (cvvField.value.length === 0 || zipCodeField.value.length < 3 || nonDigitsRegExp.test(cvvField.value)) {
         validCVV = displayErrMsgOnSubmit('\n\nCVV code must be 3 digits');
         cvvField.style.border = '2px solid rgb(226, 49, 9)';
     }
@@ -619,7 +600,7 @@ function validateCreditCardInfo() {
 }
 
 /***
- * Displays a summarized error message for the 3 fields of the credit card section: credit card number, zip code and cvv
+ * Displays an error message for the incorrect fields of the credit card section: credit card number, zip code and cvv
  * @param{String} message
  * @return {Boolean}
  */
